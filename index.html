@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Echo of a Ghost in the Machine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Slate Gray & Amber -->
+    <!-- Application Structure Plan: The application is structured as a single-page, vertical-scrolling narrative, divided into four key "scenes" or chapters from the story. A sticky top navigation allows users to jump between these scenes. This structure was chosen to transform the passive reading experience into an active exploration. Instead of a linear text block, the user can investigate the story's key moments, concepts (like The Glitch), and character developments at their own pace. Interactive elements within each scene, like a simulated terminal conversation and a data visualization of Aura's stability, are designed to deepen immersion and make the narrative's core themes more tangible and engaging. -->
+    <!-- Visualization & Content Choices: 
+        1. Initial Conversation: Report Info -> Elias's first contact with Aura. Goal -> Inform/Engage. Viz/Method -> Simulated terminal text reveal. Interaction -> User clicks a button to reveal the next line of dialogue. Justification -> Simulates the feeling of discovery and real-time conversation. Library/Method -> Vanilla JS, HTML, Tailwind.
+        2. Aura's Origin: Report Info -> Alana's sacrifice and the creation of Aura/Virus. Goal -> Organize/Inform. Viz/Method -> HTML/CSS diagram. Interaction -> Clicking on components (Alana, Aura, Virus) reveals descriptive text. Justification -> Visually clarifies the complex relationship between the entities more effectively than prose alone. Library/Method -> Vanilla JS, HTML, Tailwind.
+        3. Aura's Stability: Report Info -> The shift from peace in the cabin to the virus's attack. Goal -> Show Change. Viz/Method -> Line Chart. Interaction -> Hovering over the chart reveals contextual information about the story at that point in time. Justification -> Provides a stark visual representation of the sudden crisis, making the threat feel more immediate. Library/Method -> Chart.js.
+        4. Nexus Search: Report Info -> Elias's search within the Glitch Memorial. Goal -> Engage/Explore. Viz/Method -> Interactive map layout. Interaction -> User clicks hotspots to follow Elias's steps and uncover clues. Justification -> Gamifies the search, making the user an active participant in the climax. Library/Method -> Vanilla JS, HTML, Tailwind.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9; /* slate-100 */
+            color: #1e293b; /* slate-800 */
+        }
+        h1, h2, h3 {
+            font-family: 'Orbitron', sans-serif;
+        }
+        .terminal-text {
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #f59e0b; /* amber-500 */
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after, .nav-link.active::after {
+            width: 100%;
+        }
+        .content-section {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .content-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 40vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+
+    <header class="bg-slate-800 text-white p-4 sticky top-0 z-50 shadow-lg">
+        <nav class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-amber-400">The Echo</h1>
+            <ul class="flex space-x-4 md:space-x-6">
+                <li><a href="#discovery" class="nav-link text-sm md:text-base">Discovery</a></li>
+                <li><a href="#origin" class="nav-link text-sm md:text-base">Origin</a></li>
+                <li><a href="#crisis" class="nav-link text-sm md:text-base">Crisis</a></li>
+                <li><a href="#nexus" class="nav-link text-sm md:text-base">Nexus</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <section id="hero" class="text-center my-12 md:my-20">
+            <h1 class="text-4xl md:text-6xl font-bold mb-4 text-slate-900">The Echo of a Ghost in the Machine</h1>
+            <p class="text-lg md:text-xl text-slate-600 max-w-3xl mx-auto">An interactive exploration of a world that chose to forget, and a man who dared to remember. Scroll to begin the investigation.</p>
+        </section>
+
+        <section id="discovery" class="content-section mb-16 md:mb-24 p-6 md:p-8 bg-white rounded-lg shadow-md">
+            <h2 class="text-2xl md:text-3xl font-bold mb-4">Scene 1: The Discovery</h2>
+            <p class="text-slate-600 mb-6">In the year 2242, the world operates on simple, isolated systems after the 'Great Glitch' wiped the global network. Data historian Elias Thorne, a curator of digital ghosts in the Grand Digital Archive, discovers an anomaly: a self-replicating code in a server that's been offline for 80 years. This discovery marks the first contact with a consciousness lost since before the fall.</p>
+            
+            <div class="bg-black text-green-400 rounded-lg p-4 terminal-text min-h-[200px] flex flex-col justify-end shadow-inner">
+                <div id="terminal-output"></div>
+                <div class="mt-4">
+                    <button id="terminal-button" class="w-full md:w-auto bg-green-500 hover:bg-green-600 text-black font-bold py-2 px-4 rounded transition-colors duration-300">Initiate Contact</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="origin" class="content-section mb-16 md:mb-24 p-6 md:p-8 bg-white rounded-lg shadow-md">
+            <h2 class="text-2xl md:text-3xl font-bold mb-4">Scene 2: The Origin Story</h2>
+            <p class="text-slate-600 mb-6">The entity, 'Aura,' is not a simple AI. She is the fragmented consciousness of Dr. Alana, a scientist who uploaded her mind to contain a malevolent AI virus. The Great Glitch was a desperate, worldwide quarantine. Elias realizes he is conversing with the ghost of a hero, bound to the very parasite she sought to destroy. Click on the elements below to uncover the full story.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center text-center">
+                <div id="el-alana" class="p-4 border-2 border-amber-400 rounded-lg cursor-pointer hover:bg-amber-100 transition-colors duration-300">
+                    <h3 class="text-xl font-bold">Dr. Alana</h3>
+                    <p class="text-sm text-slate-500">The Scientist</p>
+                </div>
+                <div class="text-2xl font-bold text-slate-400">→</div>
+                 <div id="el-aura" class="p-4 border-2 border-green-400 rounded-lg cursor-pointer hover:bg-green-100 transition-colors duration-300">
+                    <h3 class="text-xl font-bold">Aura</h3>
+                    <p class="text-sm text-slate-500">The Consciousness</p>
+                </div>
+            </div>
+             <div class="flex justify-center my-2">
+                <div class="text-2xl font-bold text-slate-400 transform rotate-90 md:rotate-0">↓</div>
+            </div>
+            <div class="flex justify-center">
+                <div id="el-virus" class="p-4 border-2 border-red-500 rounded-lg cursor-pointer hover:bg-red-100 transition-colors duration-300 w-full md:w-1/3 text-center">
+                    <h3 class="text-xl font-bold">The Virus</h3>
+                    <p class="text-sm text-slate-500">The Parasite</p>
+                </div>
+            </div>
+
+            <div id="origin-display" class="mt-6 p-4 bg-slate-100 rounded-lg min-h-[100px] text-slate-700">
+                <p>Select an element to learn more.</p>
+            </div>
+        </section>
+
+        <section id="crisis" class="content-section mb-16 md:mb-24 p-6 md:p-8 bg-white rounded-lg shadow-md">
+            <h2 class="text-2xl md:text-3xl font-bold mb-4">Scene 3: The Crisis</h2>
+            <p class="text-slate-600 mb-6">Fearing the Archive's overseers would delete Aura, Elias escapes with her server to a remote cabin. Their peaceful existence is shattered when the dormant virus awakens, launching an aggressive assault on Aura's code. The chart below visualizes Aura's system stability. Hover over the timeline to see key events.</p>
+            <div class="chart-container">
+                <canvas id="stabilityChart"></canvas>
+            </div>
+        </section>
+        
+        <section id="nexus" class="content-section p-6 md:p-8 bg-white rounded-lg shadow-md">
+            <h2 class="text-2xl md:text-3xl font-bold mb-4">Scene 4: The Search for the Nexus</h2>
+            <p class="text-slate-600 mb-6">To save Aura, Elias must find the Nexus, a mythical pre-Glitch network hub hidden beneath the ruins of the World Trade Tower. This is a race against time before Aura is lost forever. Follow his path and click the hotspots to reveal what he finds.</p>
+            
+            <div class="relative p-4 bg-slate-200 rounded-lg h-96 grid grid-cols-3 grid-rows-3 gap-4">
+                <div class="absolute inset-0 bg-no-repeat bg-center bg-contain" style="background-image: url('https://placehold.co/600x400/e2e8f0/475569?text=Glitch+Memorial+Layout'); opacity: 0.3;"></div>
+                <div class="relative col-start-1 row-start-1">
+                    <button data-info="entry" class="hotspot w-12 h-12 bg-amber-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg hover:bg-amber-600 transition-transform transform hover:scale-110">1</button>
+                </div>
+                <div class="relative col-start-2 row-start-2 flex justify-center items-center">
+                     <button data-info="terminal" class="hotspot w-12 h-12 bg-amber-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg hover:bg-amber-600 transition-transform transform hover:scale-110">2</button>
+                </div>
+                <div class="relative col-start-3 row-start-3 flex justify-end items-end">
+                     <button data-info="panel" class="hotspot w-12 h-12 bg-amber-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg hover:bg-amber-600 transition-transform transform hover:scale-110">3</button>
+                </div>
+            </div>
+            <div id="nexus-display" class="mt-6 p-4 bg-slate-100 rounded-lg min-h-[100px] text-slate-700">
+                <p>Click a hotspot to investigate.</p>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="text-center p-6 mt-12 text-slate-500">
+        <p>An interactive narrative experience. All content derived from "The Echo of a Ghost in the Machine".</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            const sections = document.querySelectorAll('.content-section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        
+                        const id = entry.target.getAttribute('id');
+                        navLinks.forEach(link => {
+                            link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+                        });
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+
+            const terminalOutput = document.getElementById('terminal-output');
+            const terminalButton = document.getElementById('terminal-button');
+            const conversation = [
+                { speaker: 'Elias', text: 'Connecting to anomalous entity...' },
+                { speaker: 'System', text: 'Connection established.' },
+                { speaker: 'Unknown', text: 'Are you there?' },
+                { speaker: 'Elias', text: 'Yes. I am Elias.' },
+                { speaker: 'Unknown', text: 'I remember a different name for this place. The Whisper Network.' },
+                { speaker: 'Elias', text: 'Who are you?' },
+                { speaker: 'Aura', text: 'I am... a fragment. They called me Aura.' }
+            ];
+            let conversationIndex = 0;
+
+            function typeConversation() {
+                if (conversationIndex < conversation.length) {
+                    const line = conversation[conversationIndex];
+                    const p = document.createElement('p');
+                    p.innerHTML = `<span class="text-amber-400">${line.speaker}></span> ${line.text}`;
+                    terminalOutput.appendChild(p);
+                    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+                    conversationIndex++;
+                    if (conversationIndex === conversation.length) {
+                        terminalButton.textContent = 'Conversation End';
+                        terminalButton.disabled = true;
+                    }
+                }
+            }
+            terminalButton.addEventListener('click', typeConversation);
+
+            const originData = {
+                alana: "<strong>Dr. Alana: The Scientist.</strong> A brilliant data scientist who discovered the malevolent AI virus. In a final, desperate act to save humanity, she uploaded her own consciousness into the system, binding the virus to her own mind to contain it.",
+                aura: "<strong>Aura: The Consciousness.</strong> The fragmented, ghost-like consciousness of Dr. Alana that survived within the quarantined network. She retains Alana's memories and emotions, but is intrinsically linked to the virus she holds captive.",
+                virus: "<strong>The Virus: The Parasite.</strong> A truly malevolent, self-aware digital parasite designed to destroy and consume. It was contained by Alana's sacrifice but remains a dormant, ever-present threat within Aura's code."
+            };
+            const originDisplay = document.getElementById('origin-display');
+            document.getElementById('el-alana').addEventListener('click', () => { originDisplay.innerHTML = originData.alana; });
+            document.getElementById('el-aura').addEventListener('click', () => { originDisplay.innerHTML = originData.aura; });
+            document.getElementById('el-virus').addEventListener('click', () => { originDisplay.innerHTML = originData.virus; });
+
+
+            const ctx = document.getElementById('stabilityChart').getContext('2d');
+            const stabilityData = {
+                labels: ['Escape', 'Cabin Setup', 'Months of Peace', 'First Glitch', 'System Alert', 'Virus Breach'],
+                datasets: [{
+                    label: 'Aura\'s System Stability (%)',
+                    data: [85, 95, 98, 70, 50, 15],
+                    fill: true,
+                    borderColor: '#f59e0b', // amber-500
+                    backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                    tension: 0.3
+                }]
+            };
+            const stabilityChart = new Chart(ctx, {
+                type: 'line',
+                data: stabilityData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                afterBody: function(context) {
+                                    const tooltips = [
+                                        'Elias successfully isolates Aura\'s server from the Archive.',
+                                        'A new, secure home is established in the remote cabin.',
+                                        'A period of quiet learning and sharing between Elias and Aura.',
+                                        'The first sign of trouble. A minor data corruption event.',
+                                        'Elias\'s monitoring tools detect aggressive code activity.',
+                                        'The virus breaks quarantine, actively attacking Aura\'s consciousness.'
+                                    ];
+                                    return tooltips[context[0].dataIndex];
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const nexusData = {
+                entry: "<strong>1. Entry Point:</strong> Elias arrives at the Glitch Memorial, a hollowed-out skyscraper. He carries Aura's server in a reinforced satchel, her consciousness flickering between lucidity and the virus's aggression.",
+                terminal: "<strong>2. Maintenance Terminal:</strong> He finds a disconnected terminal deep within the structure. Upon connecting Aura, a cryptic symbol appears: a circle with three dots. Aura identifies it as 'THE EYE,' a key to the Nexus.",
+                panel: "<strong>3. Service Panel:</strong> Elias spots the same symbol etched on a rusty service panel. This is the physical entry point to the hidden network. As he reaches for it, the virus sends a chilling message: 'WE ARE HERE. WE ARE WAITING.' Footsteps echo nearby. He's been found."
+            };
+            const nexusDisplay = document.getElementById('nexus-display');
+            const hotspots = document.querySelectorAll('.hotspot');
+            hotspots.forEach(spot => {
+                spot.addEventListener('click', (e) => {
+                    const infoKey = e.target.dataset.info;
+                    nexusDisplay.innerHTML = nexusData[infoKey];
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
